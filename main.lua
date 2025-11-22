@@ -1,31 +1,57 @@
 -- Thunder Hub Loader
-if getgenv().ThunderHub_Active then return end
+if getgenv().ThunderHub_Active then
+    warn("Thunder Hub уже активен!")
+    return
+end
 getgenv().ThunderHub_Active = true
 
 print("🌩️ Thunder Hub Starting...")
 
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
 local GITHUB_REPO = "https://raw.githubusercontent.com/kotoedoff/thunder-hub-beta/main/"
 
+local function LoadModule(url)
+    print("🔄 Загрузка: " .. url)
+    local success, result = pcall(function()
+        local code = game:HttpGet(url)
+        return loadstring(code)()
+    end)
+    
+    if success then
+        print("✅ Успех: " .. url:match("([^/]+)$"))
+        return result
+    else
+        warn("❌ Ошибка: " .. url .. " - " .. tostring(result))
+        return nil
+    end
+end
+
 -- Загружаем ядро
-local kernelUrl = GITHUB_REPO .. "kernel.lua"
-local kernelCode = game:HttpGet(kernelUrl)
-local Kernel = loadstring(kernelCode)()
+local Kernel = LoadModule(GITHUB_REPO .. "kernel.lua")
+if not Kernel then
+    warn("🌀 Критическая ошибка: Не удалось загрузить ядро!")
+    return
+end
 
 -- Загружаем модули
-local flyUrl = GITHUB_REPO .. "modules/movement/fly.lua" 
-local flyCode = game:HttpGet(flyUrl)
-local Fly = loadstring(flyCode)()
-Kernel.RegisterModule(Fly)
+local Fly = LoadModule(GITHUB_REPO .. "modules/movement/fly.lua")
+if Fly then
+    Kernel.RegisterModule(Fly)
+end
 
-local espUrl = GITHUB_REPO .. "modules/visual/esp.lua"
-local espCode = game:HttpGet(espUrl) 
-local ESP = loadstring(espCode)()
-Kernel.RegisterModule(ESP)
+local ESP = LoadModule(GITHUB_REPO .. "modules/visual/esp.lua") 
+if ESP then
+    Kernel.RegisterModule(ESP)
+end
 
 -- Загружаем интерфейс
-local interfaceUrl = GITHUB_REPO .. "interface.lua"
-local interfaceCode = game:HttpGet(interfaceUrl)
-local Interface = loadstring(interfaceCode)()
-Interface.Init(Kernel)
+local Interface = LoadModule(GITHUB_REPO .. "interface.lua")
+if Interface then
+    Interface.Init(Kernel)
+else
+    warn("🌀 Не удалось загрузить интерфейс!")
+end
 
 print("🌩️ Thunder Hub Ready!")
